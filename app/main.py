@@ -2,11 +2,14 @@
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.schemas import (
+    AiChatRequest,
+    AiChatResponse,
     SalaryEvaluationRequest,
     SalaryEvaluationResponse,
     SalaryPredictionRequest,
     SalaryPredictionResponse,
 )
+from app.services.ai_service import chat_with_career_consultant
 from app.services.constants import (
     CATEGORIES,
     CERTIFICATION_LEVELS,
@@ -22,7 +25,7 @@ from app.services.spatial_service import get_industry_distribution, get_spatial_
 app = FastAPI(
     title="HireMap API",
     version="0.1.0",
-    description="FastAPI backend untuk model prediksi gaji, kos, dan data spasial HireMap.",
+    description="FastAPI backend untuk model prediksi gaji, kos, data spasial, dan AI consultant HireMap.",
 )
 
 app.add_middleware(
@@ -70,6 +73,25 @@ def evaluate_salary_endpoint(payload: SalaryEvaluationRequest) -> dict:
     return evaluate_salary(payload.input_salary, payload.prediction.model_dump())
 
 
+@app.post("/api/ai/chat", response_model=AiChatResponse)
+def ai_chat_endpoint(payload: AiChatRequest) -> dict:
+    try:
+        reply = chat_with_career_consultant(
+            message=payload.message,
+            history=[message.model_dump() for message in payload.history],
+            prediction_context=(
+                payload.prediction_context.model_dump()
+                if payload.prediction_context is not None
+                else None
+            ),
+        )
+        return {"reply": reply}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Gagal memproses AI consultant: {exc}") from exc
+
+
 @app.get("/api/spatial/summary")
 def spatial_summary() -> list[dict]:
     return get_spatial_summary()
@@ -80,5 +102,3 @@ def industry_distribution(category: str = Query(...)) -> list[dict]:
     if category not in CATEGORIES:
         raise HTTPException(status_code=400, detail="Kategori pekerjaan tidak tersedia.")
     return get_industry_distribution(category)
-
-

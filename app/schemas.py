@@ -1,4 +1,6 @@
-﻿from pydantic import BaseModel, Field, field_validator
+﻿from typing import Literal
+
+from pydantic import BaseModel, Field, field_validator
 
 from app.services.constants import (
     CATEGORIES,
@@ -92,3 +94,30 @@ class SalaryEvaluationResponse(BaseModel):
     range: dict
 
 
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., min_length=1)
+
+
+class AiPredictionContext(BaseModel):
+    judul: str | None = None
+    kategori: str | None = None
+    lokasi: str | None = None
+    pengalaman: str | None = None
+    pendidikan: str | None = None
+    sertifikasi: str | None = None
+    gaji_prediksi: int | None = None
+    gaji_min: int | None = None
+    gaji_max: int | None = None
+    estimasi_kos: int | None = None
+    rasio_kos: float | None = None
+
+
+class AiChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000)
+    history: list[ChatMessage] = Field(default_factory=list)
+    prediction_context: AiPredictionContext | None = None
+
+
+class AiChatResponse(BaseModel):
+    reply: str
