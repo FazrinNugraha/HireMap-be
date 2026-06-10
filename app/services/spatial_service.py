@@ -1,4 +1,4 @@
-﻿import pandas as pd
+import pandas as pd
 
 from app.core.paths import DATA_DIR
 from app.services.constants import COORDINATES
@@ -32,5 +32,42 @@ def get_industry_distribution(category: str) -> list[dict]:
         .reset_index()
     )
     return df_industry.to_dict(orient="records")
+
+
+def get_location_detail(location: str, category: str = None) -> dict:
+    """Kembalikan detail lengkap untuk satu kota: total jobs, kos, top 3 kategori."""
+    df_map = load_map_data()
+    df_loc = df_map[df_map["Lokasi_Clean"] == location]
+
+    total_jobs = int(df_loc["Jumlah_Lowongan"].sum())
+    kos_estimasi = predict_kos_price(location)
+
+    category_jobs = None
+    if category and category != "All Industries":
+        category_jobs = int(df_loc[df_loc["Kategori_Pekerjaan"] == category]["Jumlah_Lowongan"].sum())
+
+    # Top 3 kategori berdasarkan jumlah lowongan
+    top_categories: list[str] = (
+        df_loc.groupby("Kategori_Pekerjaan")["Jumlah_Lowongan"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(3)
+        .index.tolist()
+        if not df_loc.empty
+        else []
+    )
+
+    coords = COORDINATES.get(location, [-6.2000, 106.8166])
+
+    return {
+        "lokasi": location,
+        "total_jobs": total_jobs,
+        "kos_estimasi": kos_estimasi,
+        "category_jobs": category_jobs,
+        "top_categories": top_categories,
+        "lat": coords[0],
+        "lon": coords[1],
+    }
+
 
 

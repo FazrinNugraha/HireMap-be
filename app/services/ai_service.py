@@ -7,7 +7,7 @@ import google.generativeai as genai
 
 load_dotenv()
 
-GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash")
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-3.1-flash-lite")
 
 BASE_SYSTEM_PROMPT = (
     "Anda adalah asisten konsultan karir profesional dan perencana keuangan untuk pencari kerja di Jabodetabek. "

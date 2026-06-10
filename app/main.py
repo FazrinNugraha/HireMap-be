@@ -1,4 +1,4 @@
-﻿from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.schemas import (
@@ -13,13 +13,14 @@ from app.services.ai_service import chat_with_career_consultant
 from app.services.constants import (
     CATEGORIES,
     CERTIFICATION_LEVELS,
+    COORDINATES,
     EDUCATION_LEVELS,
     EXPERIENCE_LEVELS,
     LOCATIONS,
 )
 from app.services.salary_service import predict_salary
 from app.services.salary_zone_service import evaluate_salary
-from app.services.spatial_service import get_industry_distribution, get_spatial_summary
+from app.services.spatial_service import get_industry_distribution, get_location_detail, get_spatial_summary
 
 
 app = FastAPI(
@@ -102,3 +103,13 @@ def industry_distribution(category: str = Query(...)) -> list[dict]:
     if category not in CATEGORIES:
         raise HTTPException(status_code=400, detail="Kategori pekerjaan tidak tersedia.")
     return get_industry_distribution(category)
+
+
+@app.get("/api/spatial/location-detail")
+def location_detail_endpoint(
+    location: str = Query(...),
+    category: str = Query(None),
+) -> dict:
+    if location not in COORDINATES:
+        raise HTTPException(status_code=400, detail="Lokasi tidak ditemukan.")
+    return get_location_detail(location, category)
