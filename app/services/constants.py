@@ -28,7 +28,7 @@ CATEGORIES = [
 ]
 
 EXPERIENCE_LEVELS = {
-    "Fresh Graduate (0-1 thn)": {"m_pengalaman": 0.80, "label": "Fresh Grad"},
+    "Entry-Level (0-1 thn)": {"m_pengalaman": 0.80, "label": "Entry Level"},
     "Junior (1-3 thn)": {"m_pengalaman": 0.95, "label": "Junior"},
     "Mid-Level (3-5 thn)": {"m_pengalaman": 1.10, "label": "Mid-Level"},
     "Senior (5+ thn)": {"m_pengalaman": 1.20, "label": "Senior"},
@@ -43,9 +43,9 @@ EDUCATION_LEVELS = {
 
 CERTIFICATION_LEVELS = {
     "Tanpa Sertifikasi": {"m_sertifikat": 1.00, "label": "None"},
-    "Sertifikat BNSP / Lokal": {"m_sertifikat": 1.03, "label": "Lokal/BNSP"},
-    "Sertifikat Associate (Intl)": {"m_sertifikat": 1.05, "label": "Associate"},
-    "Sertifikat Expert (Intl)": {"m_sertifikat": 1.10, "label": "Expert"},
+    "Sertifikat Lokal / BNSP": {"m_sertifikat": 1.03, "label": "Lokal/BNSP"},
+    "Sertifikat Global (Associate)": {"m_sertifikat": 1.05, "label": "Associate"},
+    "Sertifikat Global (Expert)": {"m_sertifikat": 1.10, "label": "Expert"},
 }
 
 GENERIC_TITLE_TERMS = {

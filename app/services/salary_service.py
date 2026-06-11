@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix, hstack
 
@@ -95,9 +95,9 @@ def get_profile_adjustment(
     realism_correction = 1.0
     notes = []
 
-    if "Fresh Graduate" in experience_level:
+    if "Entry-Level" in experience_level:
         realism_correction *= 0.97
-        notes.append("Fresh graduate diberi penyesuaian ekstra agar hasil lebih realistis.")
+        notes.append("Entry-level diberi penyesuaian ekstra agar hasil lebih realistis.")
 
         if category in {
             "Administrative & Customer Service",

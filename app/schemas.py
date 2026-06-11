@@ -1,4 +1,4 @@
-﻿from typing import Literal
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -15,9 +15,9 @@ class SalaryPredictionRequest(BaseModel):
     job_title: str = Field(..., min_length=1, examples=["Data Analyst"])
     category: str = Field(..., examples=["IT, Tech & Data"])
     location: str = Field(..., examples=["Jakarta Selatan"])
-    experience_level: str = Field("💼 Mid-Level (3-5 thn)", examples=["💼 Mid-Level (3-5 thn)"])
-    education_level: str = Field("🎓 S1 / Sarjana", examples=["🎓 S1 / Sarjana"])
-    certification_level: str = Field("📄 Tanpa Sertifikasi", examples=["📄 Tanpa Sertifikasi"])
+    experience_level: str = Field("Mid-Level (3-5 thn)", examples=["Mid-Level (3-5 thn)"])
+    education_level: str = Field("S1 / Sarjana", examples=["S1 / Sarjana"])
+    certification_level: str = Field("Tanpa Sertifikasi", examples=["Tanpa Sertifikasi"])
 
     @field_validator("category")
     @classmethod
