@@ -33,7 +33,7 @@ def predict_kos_price(region: str) -> int:
             "tipe_kos": ["Campur"],
             "is_electricity_included": ["Ya"],
             "rating_clean": [4.5],
-            "rating_count_clean": [10],
+            "rating_count_clean": [100],
             "room_area": [12.0],
         }
     )
