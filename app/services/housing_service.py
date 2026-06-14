@@ -23,7 +23,21 @@ KOS_REGION_MAPPING = {
 
 
 def predict_kos_price(region: str) -> int:
-    """Predict monthly kos price using the legacy housing model inputs."""
+    """Prediksi harga kos bulanan untuk satu region.
+
+    Model housing lama membutuhkan beberapa fitur kos, bukan hanya nama kota.
+    Karena fitur frontend saat ini hanya memilih lokasi kerja, service ini
+    membuat input standar yang dianggap representatif:
+    - tipe kos: Campur,
+    - listrik termasuk,
+    - rating 4.5 dengan 100 review,
+    - luas kamar 12 m2.
+
+    Nilai region juga dipetakan lewat KOS_REGION_MAPPING karena beberapa label
+    aplikasi tidak selalu sama persis dengan label training model. Contohnya,
+    "Jakarta Raya (General)" diarahkan ke "Jakarta Selatan" sebagai fallback
+    yang relatif representatif.
+    """
     pipeline = load_housing_pipeline()
     region_value = KOS_REGION_MAPPING.get(region, "Jakarta Pusat")
 
@@ -46,7 +60,16 @@ def predict_kos_price(region: str) -> int:
 
 
 def calculate_distance(loc1: str, loc2: str) -> float:
-    """Calculate straight-line distance in KM between two known locations."""
+    """Hitung jarak garis lurus antar dua lokasi dalam kilometer.
+
+    Fungsi ini memakai rumus Haversine, yaitu pendekatan jarak berdasarkan titik
+    koordinat latitude/longitude. Hasilnya bukan jarak jalan real-time, tetapi
+    cukup untuk scoring awal seperti DSS commute atau estimasi cepat antar kota.
+
+    Jika salah satu lokasi tidak ada di COORDINATES, fungsi mengembalikan 0 agar
+    caller tidak gagal. Artinya caller perlu memahami 0 sebagai fallback, bukan
+    selalu berarti lokasi benar-benar sama.
+    """
     from math import asin, cos, radians, sin, sqrt
 
     coord1 = COORDINATES.get(loc1)
@@ -62,5 +85,4 @@ def calculate_distance(loc1: str, loc2: str) -> float:
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * asin(sqrt(a))
     return round(c * 6371, 1)
-
 

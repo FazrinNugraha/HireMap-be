@@ -1,3 +1,4 @@
+# Daftar lokasi yang muncul di dropdown Salary Prediction dan Spatial Map.
 LOCATIONS = [
     "Bekasi",
     "Bogor",
@@ -12,6 +13,7 @@ LOCATIONS = [
     "Tangerang Selatan",
 ]
 
+# Daftar kategori pekerjaan utama yang dipakai untuk filter, model, dan metadata.
 CATEGORIES = [
     "Administrative & Customer Service",
     "Creative, Design & Media",
@@ -27,6 +29,7 @@ CATEGORIES = [
     "Sales & Marketing",
 ]
 
+# Multiplier pengalaman untuk mengoreksi base salary dari model ML.
 EXPERIENCE_LEVELS = {
     "Entry-Level (0-1 thn)": {"m_pengalaman": 0.80, "label": "Entry Level"},
     "Junior (1-3 thn)": {"m_pengalaman": 0.95, "label": "Junior"},
@@ -34,6 +37,7 @@ EXPERIENCE_LEVELS = {
     "Senior (5+ thn)": {"m_pengalaman": 1.20, "label": "Senior"},
 }
 
+# Multiplier pendidikan untuk menyesuaikan estimasi gaji berdasarkan pendidikan.
 EDUCATION_LEVELS = {
     "SMA / SMK": {"m_pendidikan": 0.75, "label": "SMA/SMK"},
     "Diploma (D3/D4)": {"m_pendidikan": 0.90, "label": "Diploma"},
@@ -41,6 +45,7 @@ EDUCATION_LEVELS = {
     "S2 / Magister ke atas": {"m_pendidikan": 1.10, "label": "S2+"},
 }
 
+# Multiplier sertifikasi untuk memberi efek tambahan pada profil user.
 CERTIFICATION_LEVELS = {
     "Tanpa Sertifikasi": {"m_sertifikat": 1.00, "label": "None"},
     "Sertifikat Lokal / BNSP": {"m_sertifikat": 1.03, "label": "Lokal/BNSP"},
@@ -48,6 +53,8 @@ CERTIFICATION_LEVELS = {
     "Sertifikat Global (Expert)": {"m_sertifikat": 1.10, "label": "Expert"},
 }
 
+# Kata yang dianggap terlalu umum jika muncul sebagai judul pekerjaan.
+# Contoh: "Staff" saja terlalu luas, sehingga confidence perlu diturunkan.
 GENERIC_TITLE_TERMS = {
     "staff",
     "admin",
@@ -63,6 +70,8 @@ GENERIC_TITLE_TERMS = {
     "general",
 }
 
+# Kata generik yang hanya ambigu pada kategori tertentu.
+# Ini membantu sistem membaca konteks, misalnya "admin" lebih umum di Admin/HR.
 GENERIC_CATEGORY_KEYWORDS = {
     "Administrative & Customer Service": {"staff", "admin", "administrasi", "assistant"},
     "HR & General Affairs": {"staff", "admin", "assistant", "generalist"},
@@ -70,8 +79,10 @@ GENERIC_CATEGORY_KEYWORDS = {
     "Logistics & Supply Chain": {"staff", "operator", "helper", "admin"},
 }
 
+# Lokasi non-prime dipakai untuk koreksi ekstra saat judul pekerjaan ambigu.
 NON_PRIME_LOCATIONS = {"Bogor", "Depok", "Bekasi", "Tangerang", "Tangerang Selatan"}
 
+# Koordinat kota untuk peta, perhitungan jarak, dan marker spatial.
 COORDINATES = {
     "Jakarta Selatan": [-6.2615, 106.8106],
     "Jakarta Barat": [-6.1683, 106.7588],

@@ -19,12 +19,29 @@ BASE_SYSTEM_PROMPT = (
 
 
 def _format_currency(value: int | float | None) -> str:
+    """Format angka gaji/kos agar mudah dibaca di prompt AI.
+
+    Fungsi ini hanya untuk teks prompt, bukan untuk perhitungan. Jika value tidak
+    tersedia, prompt akan memakai tanda "-" supaya Gemini tetap mendapat kalimat
+    yang stabil dan tidak error karena nilai None.
+    """
     if value is None:
         return "-"
     return f"Rp {int(value):,}"
 
 
 def build_system_prompt(prediction_context: dict | None = None) -> str:
+    """Bangun system prompt Gemini berdasarkan konteks prediksi user.
+
+    System prompt adalah instruksi dasar yang dibaca model sebelum menjawab chat.
+    Di sini kita menggabungkan dua hal:
+    1. BASE_SYSTEM_PROMPT, yaitu peran umum AI sebagai konsultan karir/finansial.
+    2. prediction_context, yaitu hasil Salary Prediction terbaru milik user.
+
+    Jika user belum menjalankan prediksi, AI tetap bisa menjawab pertanyaan umum.
+    Jika konteks prediksi tersedia, AI akan diarahkan untuk memakai informasi
+    posisi, lokasi, range gaji, estimasi kos, dan rasio kos sebagai dasar saran.
+    """
     if not prediction_context:
         context_text = "Belum ada data prediksi gaji dari pengguna ini."
     else:
@@ -55,6 +72,13 @@ def build_system_prompt(prediction_context: dict | None = None) -> str:
 
 
 def _to_gemini_history(history: list[dict]) -> list[dict]:
+    """Konversi history chat frontend ke format role yang diminta Gemini.
+
+    Frontend menyimpan role sebagai "user" dan "assistant". Gemini memakai
+    "user" dan "model", jadi message assistant perlu diganti menjadi model.
+    Message kosong atau role yang tidak dikenal dilewati agar request ke Gemini
+    tidak gagal karena format history yang tidak valid.
+    """
     gemini_history = []
     for message in history:
         role = message.get("role")
@@ -76,6 +100,19 @@ def chat_with_career_consultant(
     history: list[dict] | None = None,
     prediction_context: dict | None = None,
 ) -> str:
+    """Kirim pesan user ke Gemini dan kembalikan jawaban AI Consultant.
+
+    Fungsi ini adalah service utama untuk endpoint chat. Urutannya:
+    1. Ambil GEMINI_API_KEY dari environment.
+    2. Configure SDK Gemini.
+    3. Buat model dengan system_instruction dari build_system_prompt.
+    4. Mulai chat dengan history yang sudah dikonversi.
+    5. Kirim message terbaru.
+    6. Validasi response supaya frontend tidak menerima jawaban kosong.
+
+    prediction_context bersifat optional, tetapi ketika ada, jawaban AI akan jauh
+    lebih personal karena tahu estimasi gaji, lokasi kerja, kos, dan rasio kos.
+    """
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY belum tersedia di environment backend.")

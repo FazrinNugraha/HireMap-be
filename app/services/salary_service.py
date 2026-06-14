@@ -15,6 +15,13 @@ from app.services.housing_service import predict_kos_price
 
 
 def tokenize_title(job_title: str) -> list[str]:
+    """Pecah judul pekerjaan menjadi token sederhana untuk analisis ambiguitas.
+
+    Fungsi ini dipakai sebelum model memberikan koreksi realistis terhadap judul
+    pekerjaan. Contohnya, "Admin Finance" akan menjadi ["admin", "finance"].
+    Token inilah yang nanti dibandingkan dengan daftar kata generik seperti
+    "staff", "admin", atau "crew".
+    """
     cleaned = (
         job_title.lower()
         .replace("/", " ")
@@ -26,6 +33,20 @@ def tokenize_title(job_title: str) -> list[str]:
 
 
 def analyze_title_ambiguity(job_title: str, category: str, location: str) -> dict:
+    """Analisis apakah judul pekerjaan terlalu umum dan perlu dikoreksi.
+
+    Tujuan fungsi ini adalah mencegah model memberi estimasi terlalu optimistis
+    untuk judul yang sangat generik. Misalnya input "Staff" atau "Admin" tidak
+    punya konteks bidang yang cukup jelas, sehingga sistem menurunkan confidence
+    dan memberi multiplier koreksi.
+
+    Flow sederhananya:
+    1. Judul pekerjaan di-tokenize.
+    2. Token dibandingkan dengan daftar kata generik global.
+    3. Token juga dibandingkan dengan kata generik khusus kategori pekerjaan.
+    4. Kalau judul terlalu pendek/generik, sistem memberi title_correction.
+    5. Fungsi mengembalikan metadata yang dipakai di response salary prediction.
+    """
     tokens = tokenize_title(job_title)
     token_count = len(tokens)
     generic_matches = [token for token in tokens if token in GENERIC_TITLE_TERMS]
@@ -84,6 +105,18 @@ def get_profile_adjustment(
     certification_level: str,
     category: str,
 ) -> dict:
+    """Hitung multiplier profil user berdasarkan pengalaman, pendidikan, sertifikasi.
+
+    Model ML utama hanya memprediksi gaji dasar dari judul, kategori, dan lokasi.
+    Setelah itu, fungsi ini menyesuaikan hasil berdasarkan profil user:
+    - pengalaman kerja menaikkan/menurunkan angka via m_pengalaman,
+    - pendidikan memberi koreksi via m_pendidikan,
+    - sertifikasi memberi koreksi via m_sertifikat,
+    - realism_correction menjaga role entry-level/generik tetap realistis.
+
+    Output fungsi ini tidak langsung menjadi gaji akhir, tetapi menjadi faktor
+    pengali yang dipakai oleh predict_salary setelah base salary keluar.
+    """
     experience = EXPERIENCE_LEVELS[experience_level]
     education = EDUCATION_LEVELS[education_level]
     certification = CERTIFICATION_LEVELS[certification_level]
@@ -130,7 +163,22 @@ def get_profile_adjustment(
 
 
 def predict_base_salary(job_title: str, category: str, location: str) -> float:
-    """Replicate the legacy Streamlit ML feature pipeline."""
+    """Prediksi gaji dasar menggunakan pipeline ML legacy.
+
+    Ini adalah bagian paling dekat dengan model machine learning asli. Fitur yang
+    dibangun harus sama dengan pipeline training/Streamlit lama agar urutan kolom
+    dan representasi datanya cocok dengan model tersimpan.
+
+    Komponen fitur yang digabung:
+    - TF-IDF word dari job_title,
+    - TF-IDF character dari job_title,
+    - target salary placeholder legacy,
+    - fitur tambahan seperti panjang judul dan jumlah kata,
+    - one-hot encoding lokasi, kategori, dan senioritas.
+
+    Output masih berupa base salary mentah. Koreksi judul, profil user, dan kos
+    dilakukan setelah fungsi ini di predict_salary.
+    """
     resources = load_salary_resources()
     model = resources["model"]
     tfidf_word = resources["tfidf_word"]
@@ -161,6 +209,25 @@ def predict_base_salary(job_title: str, category: str, location: str) -> float:
 
 
 def predict_salary(payload) -> dict:
+    """Endpoint service utama untuk fitur Salary Prediction.
+
+    Fungsi ini menerima payload dari router/API, lalu menggabungkan beberapa
+    service kecil menjadi satu response lengkap untuk frontend.
+
+    Flow prediksi:
+    1. Bersihkan job_title dari spasi berlebih.
+    2. Jalankan model ML untuk mendapatkan base_salary.
+    3. Analisis apakah judul terlalu generik lewat analyze_title_ambiguity.
+    4. Hitung multiplier profil user lewat get_profile_adjustment.
+    5. Terapkan koreksi judul dan multiplier profil untuk final_salary.
+    6. Prediksi estimasi kos lokasi kerja.
+    7. Hitung rasio kos terhadap gaji prediksi.
+    8. Kembalikan semua angka dan metadata yang dibutuhkan UI.
+
+    Response dibuat cukup lengkap karena beberapa fitur frontend memakai data
+    yang sama: Salary Result, Housing Affordability, DSS score, Career Journey,
+    dan AI Consultant context.
+    """
     job_title = payload.job_title.strip()
     base_salary = predict_base_salary(job_title, payload.category, payload.location)
 
