@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -33,10 +34,14 @@ app = FastAPI(
     description="FastAPI backend untuk model prediksi gaji, kos, data spasial, dan AI consultant HireMap.",
 )
 
-# CORS mengizinkan frontend Vite lokal mengakses API backend saat development.
+# Ambil ALLOWED_ORIGINS dari environment (comma-separated), default localhost untuk dev
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+
+# CORS mengizinkan frontend mengakses API backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,9 +62,9 @@ def _option_list(options: dict, multiplier_key: str) -> list[dict]:
     ]
 
 
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health_check() -> dict:
-    """Endpoint sederhana untuk memastikan API backend hidup."""
+    """Endpoint sederhana untuk memastikan API backend hidup. Mendukung GET dan HEAD (untuk UptimeRobot)."""
     return {"status": "ok", "service": "hiremap-api"}
 
 
