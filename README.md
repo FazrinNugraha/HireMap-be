@@ -1,4 +1,4 @@
-﻿# HireMap FastAPI Backend
+# HireVision FastAPI Backend
 
 Backend ini adalah versi API bersih dari logic Streamlit lama. Model dan data memakai folder root project backend:
 

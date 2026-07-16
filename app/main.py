@@ -29,9 +29,9 @@ from app.services.spatial_service import (
 
 
 app = FastAPI(
-    title="HireMap API",
+    title="HireVision API",
     version="0.1.0",
-    description="FastAPI backend untuk model prediksi gaji, kos, data spasial, dan AI consultant HireMap.",
+    description="FastAPI backend untuk model prediksi gaji, kos, data spasial, dan AI consultant HireVision.",
 )
 
 # Ambil ALLOWED_ORIGINS dari environment (comma-separated), default localhost untuk dev
@@ -65,7 +65,7 @@ def _option_list(options: dict, multiplier_key: str) -> list[dict]:
 @app.api_route("/api/health", methods=["GET", "HEAD"])
 def health_check() -> dict:
     """Endpoint sederhana untuk memastikan API backend hidup. Mendukung GET dan HEAD (untuk UptimeRobot)."""
-    return {"status": "ok", "service": "hiremap-api"}
+    return {"status": "ok", "service": "hirevision-api"}
 
 
 @app.get("/api/metadata")
